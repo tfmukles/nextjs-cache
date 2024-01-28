@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath, unstable_cache } from "next/cache";
+import { Todo as TTodo } from "../form";
 import { connect } from "../libs/connect";
 import { Todo } from "../models/todo.model";
 
@@ -18,7 +19,6 @@ export type FormState = {
 };
 
 export async function createTodo(previousState: FormState, formData: FormData) {
-  console.log(previousState);
   const { todo } = Object.fromEntries(formData.entries());
   try {
     connect();
@@ -49,4 +49,15 @@ export async function deleteTodo(formData: FormData) {
   } catch (error) {
     console.log(error);
   }
+}
+
+export async function saveTodo(todo: TTodo, formData: FormData) {
+  let newTodo = {
+    ...todo,
+    todo: formData.get("todo") as string,
+  };
+
+  connect();
+  await Todo.create({ ...newTodo });
+  revalidatePath("/");
 }
